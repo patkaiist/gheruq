@@ -5,7 +5,12 @@ import itertools
 import sqlite3
 import random
 
+# help message is always shown at the top of the screen
 message = "Type 'help' for additional information. Leave blank for a random example."
+
+# to do:
+# - waħdanija <n> isn't handled
+# - waħħad causes issue, as does <w> in general it seems
 
 
 def main():
@@ -21,24 +26,27 @@ def main():
             print("")
             print(
                 gold("alignment key"),
-                "\n1 - primary root radical\n2 - repeated radical (shaddah)\n3 - non-root affix\n4 - weak root radical\n0 - non-root vowel\n",
+                "\n1 - primary root radical\n2 - repeated radical\n3 - non-root affix\n4 - weak root radical\n0 - non-root vowel\n",
             )
         elif user_word == "":
             analyse(
                 random.choice(
                     (
                         "bagħgħad",
-                        "tibrid",
-                        "tibżil",
                         "beżżieq",
                         "daħħan",
                         "ddammem",
-                        "ħbejjeb",
-                        "ħabeż",
-                        "ħtalat",
-                        "settieħa",
                         "giddieb",
+                        "ħabeż",
+                        "ħbejjeb",
+                        "ħtalat",
+                        "ltemaħ",
                         "nissieġ",
+                        "qatta",
+                        "settieħa",
+                        "tibrid",
+                        "tibżil",
+                        "waħħad",
                     )
                 )
             )
@@ -97,13 +105,10 @@ def analyse(user_word):
     # we make an aggressively reduced root first, which we then use to work out the more likely form.
     if len(full_root) > 3:
         temp_root = mark_passive_participle(full_root)  # ism mafʿūl
-        print(temp_root)
         if len(temp_root) > 3:
             temp_root = merge_shaddah(temp_root)
-            print(temp_root)
             if len(temp_root) > 3:
                 temp_root = remove_weak(temp_root)
-                print(temp_root)
             full_root = temp_root
 
     full_root = [item for item in full_root if item and item.strip()]
@@ -120,11 +125,13 @@ def analyse(user_word):
 
         # check for ism ma
         if all_segments[0] == "m":
-            print("-".join(swap_għajn(radicals)), warn("assuming participle"))
+            print(warn("assuming participle"))
 
         # check for t- or n- prefix
         elif all_segments[0] == "t" or all_segments[0] == "n":
-            print("-".join(swap_għajn(radicals)), warn("assuming binyan pattern"))
+            print(warn("assuming binyan pattern"))
+            aligned_root[0] = "3"
+            type = "b"
 
         # if none of the above, then we may have a plural, so check for that.
         elif all_segments[len(all_segments) - 1] == "n":
@@ -148,22 +155,24 @@ def analyse(user_word):
             "-".join(swap_għajn(radicals)),
             warn("no prefix detected, assuming longer root"),
         )
-        # printed = True
-
     print("-".join(swap_għajn(radicals)))
 
     print("")
     print(gold("alignment"))
-    print("\t".join(all_segments))
-    print("\t".join(aligned_root))
+    # making the spacing look a little nicer, even though joining with \t would be simpler and easier
+    printable_segments = ""
+    gap = " "
+    if "ie" in all_segments or "għ" in all_segments:
+        gap = "  "
+    for segment in all_segments:
+        printable_segments += segment + (gap if len(segment) > 1 else " " + gap)
+    print(printable_segments)
+    print((" " + gap).join(aligned_root))
 
     print("")
     print(gold("possible Arabic roots"))
     isolate(arabify(radicals))
     print("")
-
-
-end = "\033[0m"
 
 
 def find_second(input_list):
@@ -177,22 +186,18 @@ def find_second(input_list):
 
 
 def warn(text):
-    start = "\033[31m"
-    return f"{start}{text}{end}"
+    return f"\033[31m{text}\033[0m"
 
 
 def blue(text):
-    start = "\033[36m"
-    return f"{start}{text}{end}"
+    return f"\033[36m{text}\033[0m"
 
 
 def gold(text):
-    start = "\033[33m"
-    return f"{start}{text}{end}"
+    return f"\033[33m{text}\033[0m"
 
 
 def mediopassive():
-    # ltemaħ
     pass
 
 
@@ -283,25 +288,26 @@ def remove_vowels(letters):
 
 def arabify(input_list):
     mapping = {
-        "għ": "ع|غ",
         "ġħ": "ع|غ",
-        "g": "قَ|ك",
-        "d": "ض|د|ذ",
+        "'": "ى|ي|ع",
         "b": "ب",
-        "s": "س",
-        "l": "ل",
+        "d": "ض|د|ذ",
+        "ġ": "ج",
+        "g": "قَ|ك",
+        "ħ": "ح|خ",
+        "h": "ه",
+        "j": "ي",
         "k": "ك",
-        "'": "ى|ي",
+        "l": "ل",
+        "m": "م",
         "n": "ن",
-        "t": "ط|ت",
         "q": "ق",
         "r": "ر",
-        "m": "م",
-        "ħ": "ح|خ",
+        "s": "س",
+        "t": "ط|ت|ﺙ",
+        "w": "ﻭ",
         "x": "ش",
-        "j": "ي",
         "ż": "ز",
-        "ġ": "ج",
     }
 
     def replace_match(match):
@@ -314,7 +320,6 @@ def arabify(input_list):
         return text
 
     output_list = [replace_in_string(item) for item in input_list]
-
     return output_list
 
 
@@ -358,10 +363,15 @@ def isolate(input_string):
 
     conn = sqlite3.connect("hanswehr.sqlite")
     for result in results:
+        if result == "وحد":
+            print("OK!")
         cursor = conn.cursor()
+        # query = 'SELECT `definition` FROM `DICTIONARY` WHERE `word` LIKE "%'+result+'%" LIMIT 10;'
+        # print(query)
+        # cursor.execute(query)
         cursor.execute(
             """
-            SELECT `definition`, `id` FROM `DICTIONARY` 
+            SELECT `definition` FROM `DICTIONARY` 
             WHERE `word` LIKE ?
             LIMIT 10
         """,
@@ -369,12 +379,16 @@ def isolate(input_string):
         )
 
         rows = cursor.fetchall()
+
         if len(rows) > 0:
             print("")
             print(blue(" ".join(result[::-1]).replace("ك", "ک")))
             i = 1
             for row in rows:
-                print(blue(i), gold(row[1]), strip_arabic(row[0][:100]))
+                e = str(i) + " "
+                if i < 10:
+                    e = e + " "
+                print(blue(e) + strip_arabic(row[0][:100]))
                 i += 1
 
 
