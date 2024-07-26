@@ -19,7 +19,7 @@ def main():
             print("")
             print(
                 gold("alignment key"),
-                "\n1 - primary root radical\n2 - repeated root (damma)\n3 - non-root prefix\n4 - weak root radical\n0 - non-root vowel\n",
+                "\n1 - primary root radical\n2 - repeated radical (shadda)\n3 - non-root prefix\n4 - weak root radical\n0 - non-root vowel\n",
             )
         elif user_word == "ex":
             analyse(
@@ -53,7 +53,7 @@ def analyse(user_word):
     if len(full_root) > 3:
         temp_root = mimmation(full_root)
         if len(temp_root) > 3:
-            temp_root = merge_damma(temp_root)
+            temp_root = merge_shadda(temp_root)
             if len(temp_root) > 3:
                 temp_root = remove_weak(temp_root)
             full_root = temp_root
@@ -129,7 +129,7 @@ def mimmation(input_list):
         return input_list
 
 
-def merge_damma(input_list):
+def merge_shadda(input_list):
     if not input_list:
         return []
     new_list = [input_list[0]]
