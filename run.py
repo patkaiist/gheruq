@@ -5,9 +5,11 @@ import itertools
 import sqlite3
 import random
 
+message = "Type 'help' for additional information. Leave blank for a random example."
+
 
 def main():
-    print("Type 'help' for additional information. Type 'ex' for a random example.")
+    print(message)
     while True:
         user_word = input("> ").lower()
         user_word = user_word.replace("gh", "għ")
@@ -19,12 +21,25 @@ def main():
             print("")
             print(
                 gold("alignment key"),
-                "\n1 - primary root radical\n2 - repeated radical (shadda)\n3 - non-root prefix\n4 - weak root radical\n0 - non-root vowel\n",
+                "\n1 - primary root radical\n2 - repeated radical (shaddah)\n3 - non-root affix\n4 - weak root radical\n0 - non-root vowel\n",
             )
-        elif user_word == "ex":
+        elif user_word == "":
             analyse(
                 random.choice(
-                    ("bagħgħad", "tibrid", "tibżil", "beżżieq", "daħħan", "ddammem", "ħbejjeb", "ħabeż", "ħtalat", "settieħa")
+                    (
+                        "bagħgħad",
+                        "tibrid",
+                        "tibżil",
+                        "beżżieq",
+                        "daħħan",
+                        "ddammem",
+                        "ħbejjeb",
+                        "ħabeż",
+                        "ħtalat",
+                        "settieħa",
+                        "giddieb",
+                        "nissieġ",
+                    )
                 )
             )
         else:
@@ -32,10 +47,40 @@ def main():
 
 
 def analyse(user_word):
-
+    clear()
+    print(message)
     # separate the input based on Maltese orthography
     delimiters = [
-        "għ", "ie", "a", "b", "ċ", "d", "e", "f", "g", "ġ", "h", "ħ", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "z", "ż",
+        "għ",
+        "ie",
+        "a",
+        "b",
+        "ċ",
+        "d",
+        "e",
+        "f",
+        "g",
+        "ġ",
+        "h",
+        "ħ",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "z",
+        "ż",
     ]
     pattern = "|".join(map(re.escape, delimiters))
     all_segments = re.split(f"({pattern})", user_word)
@@ -48,50 +93,69 @@ def analyse(user_word):
     # generate most likely root, assuming we're after trilateral roots that may be geminate or weak
     full_root = remove_vowels(all_segments)
     full_root = [item for item in full_root if item and item.strip()]
-    # print(full_root)
 
+    # we make an aggressively reduced root first, which we then use to work out the more likely form.
     if len(full_root) > 3:
-        temp_root = ismmaful(full_root)
+        temp_root = mark_passive_participle(full_root)  # ism mafʿūl
+        print(temp_root)
         if len(temp_root) > 3:
-            temp_root = merge_shadda(temp_root)
+            temp_root = merge_shaddah(temp_root)
+            print(temp_root)
             if len(temp_root) > 3:
                 temp_root = remove_weak(temp_root)
+                print(temp_root)
             full_root = temp_root
 
-    full_root = [item for item in full_root if item and item.strip()]   
-    
-    # to do: account for plurals
+    full_root = [item for item in full_root if item and item.strip()]
 
     # generate alignment list
     aligned_root = root_alignment(all_segments, full_root)
 
-    print("")
-    print(gold("alignment"))
-    print("\t".join(all_segments))
-    print("\t".join(aligned_root))
-
-    print("")
-    print(gold("likely Maltese root"))
-    
     radicals = []
     for i in range(len(aligned_root)):
         if aligned_root[i] == "1":
             radicals.append(all_segments[i])
 
-    printed = False
-    if ((aligned_root.count("1") + aligned_root.count("4")) >= 3):
-        if (all_segments[0] == "m"):
-            print("-".join(swap_għajn(radicals)), warn("assuming participle"))
-            printed = True
-        elif (all_segments[0] == "t" or all_segments[0] == "n"):
-            print("-".join(swap_għajn(radicals)), warn("assuming binyan pattern"))
-            printed = True
-    if (len(radicals) > 3):
-        print("-".join(swap_għajn(radicals)), warn("no prefix detected, assuming longer root"))
-        printed = True
-    if printed == False:
-        print("-".join(swap_għajn(radicals)))
+    if (aligned_root.count("1") + aligned_root.count("4")) > 3:
 
+        # check for ism ma
+        if all_segments[0] == "m":
+            print("-".join(swap_għajn(radicals)), warn("assuming participle"))
+
+        # check for t- or n- prefix
+        elif all_segments[0] == "t" or all_segments[0] == "n":
+            print("-".join(swap_għajn(radicals)), warn("assuming binyan pattern"))
+
+        # if none of the above, then we may have a plural, so check for that.
+        elif all_segments[len(all_segments) - 1] == "n":
+            print(warn("probable plural"))
+            aligned_root[len(all_segments) - 1] = "3"
+
+        # if still none of the above, then assume verb form VIII -t- infix
+        elif all_segments[find_second(aligned_root)] == "t":
+            print(warn("probable mediopassive"))
+            aligned_root[find_second(aligned_root)] = "3"
+
+    radicals = []
+    for i in range(len(aligned_root)):
+        if aligned_root[i] == "1":
+            radicals.append(all_segments[i])
+
+    print("")
+    print(gold("likely Maltese root"))
+    if len(radicals) > 3:
+        print(
+            "-".join(swap_għajn(radicals)),
+            warn("no prefix detected, assuming longer root"),
+        )
+        # printed = True
+
+    print("-".join(swap_għajn(radicals)))
+
+    print("")
+    print(gold("alignment"))
+    print("\t".join(all_segments))
+    print("\t".join(aligned_root))
 
     print("")
     print(gold("possible Arabic roots"))
@@ -100,6 +164,16 @@ def analyse(user_word):
 
 
 end = "\033[0m"
+
+
+def find_second(input_list):
+    count = 0
+    for index, value in enumerate(input_list):
+        if value == "1":
+            count += 1
+            if count == 2:
+                return index
+    return -1
 
 
 def warn(text):
@@ -117,7 +191,12 @@ def gold(text):
     return f"{start}{text}{end}"
 
 
-def ismmaful(input_list):
+def mediopassive():
+    # ltemaħ
+    pass
+
+
+def mark_passive_participle(input_list):
     if not input_list:
         return []
     new_list = []
@@ -129,7 +208,7 @@ def ismmaful(input_list):
         return input_list
 
 
-def merge_shadda(input_list):
+def merge_shaddah(input_list):
     if not input_list:
         return []
     new_list = [input_list[0]]
@@ -179,7 +258,7 @@ def root_alignment(input_list, full_root):
     output = [output_mapping.get(item, "1") for item in new_root]
     output = fix_geminate_or_weak_root(output)
 
-    # de-mimmify
+    # ism al-mafʿūl / passive participle
     if output[0] == "1" and input_list[0] == "m" and full_root[0] != "m":
         output[0] = "3"
 
@@ -203,36 +282,33 @@ def remove_vowels(letters):
 
 
 def arabify(input_list):
-    maltese = [
-        "għ", "g", "d", "b", "s", "l", "k", "'", "n", "t", "q", "r", "m", "ħ", "x", "j", "ż",
-    ]
-    arabic = [
-        "ع|غ",
-        "قَ",
-        "ض|د",
-        "ب",
-        "س",
-        "ل",
-        "ك",
-        "ى|ي",
-        "ن",
-        "ط|ت",
-        "ق",
-        "ر",
-        "م",
-        "ح|خ",
-        "ش",
-        "ي",
-        "ز",
-    ]
-
-    mapping = dict(zip(maltese, arabic))
+    mapping = {
+        "għ": "ع|غ",
+        "ġħ": "ع|غ",
+        "g": "قَ|ك",
+        "d": "ض|د|ذ",
+        "b": "ب",
+        "s": "س",
+        "l": "ل",
+        "k": "ك",
+        "'": "ى|ي",
+        "n": "ن",
+        "t": "ط|ت",
+        "q": "ق",
+        "r": "ر",
+        "m": "م",
+        "ħ": "ح|خ",
+        "x": "ش",
+        "j": "ي",
+        "ż": "ز",
+        "ġ": "ج",
+    }
 
     def replace_match(match):
         return mapping.get(match.group(0), match.group(0))
 
     def replace_in_string(text):
-        for key in maltese:
+        for key in mapping:
             pattern = re.compile(re.escape(key))
             text = pattern.sub(replace_match, text)
         return text
