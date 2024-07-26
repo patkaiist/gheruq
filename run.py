@@ -51,7 +51,7 @@ def analyse(user_word):
     # print(full_root)
 
     if len(full_root) > 3:
-        temp_root = mimmation(full_root)
+        temp_root = ismmaful(full_root)
         if len(temp_root) > 3:
             temp_root = merge_shadda(temp_root)
             if len(temp_root) > 3:
@@ -81,7 +81,7 @@ def analyse(user_word):
     printed = False
     if ((aligned_root.count("1") + aligned_root.count("4")) >= 3):
         if (all_segments[0] == "m"):
-            print("-".join(swap_għajn(radicals)), warn("assuming mimmation"))
+            print("-".join(swap_għajn(radicals)), warn("assuming participle"))
             printed = True
         elif (all_segments[0] == "t" or all_segments[0] == "n"):
             print("-".join(swap_għajn(radicals)), warn("assuming binyan pattern"))
@@ -117,7 +117,7 @@ def gold(text):
     return f"{start}{text}{end}"
 
 
-def mimmation(input_list):
+def ismmaful(input_list):
     if not input_list:
         return []
     new_list = []
