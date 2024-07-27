@@ -14,38 +14,21 @@ message = "Type 'help' for additional information. Leave blank for a random exam
 def main():
     print(message)
     while True:
-        user_word = input("> ").lower()
+        user_word = input("\n> ").lower()
         user_word = user_word.replace("gh", "ġħ")
         if user_word == "q" or user_word == "quit" or user_word == "exit":
             break
         elif user_word == "clear":
             clear()
         elif user_word == "help":
-            print("")
             print(
-                gold("alignment key"),
+                gold("\nalignment key"),
                 "\n1 - primary root radical\n2 - repeated radical\n3 - non-root affix\n4 - weak root radical\n0 - non-root vowel\n",
             )
         elif user_word == "":
             analyse(
                 random.choice(
-                    (
-                        "baġħġħad",
-                        "beżżieq",
-                        "daħħan",
-                        "ddammem",
-                        "giddieb",
-                        "ħabeż",
-                        "ħbejjeb",
-                        "ħtalat",
-                        "ltemaħ",
-                        "nissieġ",
-                        "qatta",
-                        "settieħa",
-                        "tibrid",
-                        "tibżil",
-                        "waħħad",
-                    )
+                    ("baġħġħad", "beżżieq", "daħħan", "ddammem", "giddieb", "ħabeż", "ħbejjeb", "ħtalat", "ltemaħ", "nissieġ", "qatta", "settieħa", "tibrid", "tibżil", "waħħad",)
                 )
             )
         else:
@@ -56,44 +39,12 @@ def analyse(user_word):
     clear()
     print(message)
     # separate the input based on Maltese orthography
-    delimiters = [
-        "ġħ",
-        "ie",
-        "a",
-        "b",
-        "ċ",
-        "d",
-        "e",
-        "f",
-        "g",
-        "ġ",
-        "h",
-        "ħ",
-        "i",
-        "j",
-        "k",
-        "l",
-        "m",
-        "n",
-        "o",
-        "p",
-        "q",
-        "r",
-        "s",
-        "t",
-        "u",
-        "v",
-        "w",
-        "x",
-        "z",
-        "ż",
-    ]
+    delimiters = ["ġħ", "ie", "a", "b", "ċ", "d", "e", "f", "g", "ġ", "h", "ħ", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "z", "ż",]
     pattern = "|".join(map(re.escape, delimiters))
     all_segments = re.split(f"({pattern})", user_word)
     all_segments = [item for item in all_segments if item]
 
-    print("")
-    print(gold("segments"))
+    print(gold("\nsegments"))
     print(" ".join(all_segments))
 
     # generate most likely root, assuming we're after trilateral roots that may be geminate or weak
@@ -146,8 +97,7 @@ def analyse(user_word):
         if aligned_root[i] == "1":
             radicals.append(all_segments[i])
 
-    print("")
-    print(gold("likely Maltese root"))
+    print(gold("\nlikely Maltese root"))
     if len(radicals) > 3:
         print(
             "-".join(swap_ġħajn(radicals)),
@@ -155,8 +105,7 @@ def analyse(user_word):
         )
     print("-".join(swap_ġħajn(radicals)))
 
-    print("")
-    print(gold("alignment"))
+    print(gold("\nalignment"))
     # making the spacing look a little nicer, even though joining with \t would be simpler and easier
     printable_segments = ""
     gap = " "
@@ -167,20 +116,13 @@ def analyse(user_word):
     print(printable_segments)
     print((" " + gap).join(aligned_root))
 
-    print("")
-    print(gold("possible Arabic roots"))
+    print(gold("\npossible Arabic roots"))
     isolate(arabify(radicals))
-    print("")
 
 
 def find_second(input_list):
-    count = 0
-    for index, value in enumerate(input_list):
-        if value == "1":
-            count += 1
-            if count == 2:
-                return index
-    return -1
+    indices = [index for index, value in enumerate(input_list) if value == "1"]
+    return indices[1] if len(indices) > 1 else -1
 
 
 def warn(text):
@@ -195,45 +137,26 @@ def gold(text):
     return f"\033[33m{text}\033[0m"
 
 
-def mediopassive():
-    pass
-
-
 def mark_passive_participle(input_list):
-    if not input_list:
-        return []
-    new_list = []
-    if input_list[0] == "m":
-        for i in range(1, len(input_list)):
-            new_list.append(input_list[i])
-        return new_list
-    else:
-        return input_list
+    return input_list[1:] if input_list and input_list[0] == "m" else input_list
 
 
 def merge_shaddah(input_list):
     if not input_list:
         return []
-    new_list = [input_list[0]]
-
-    for i in range(1, len(input_list)):
-        if input_list[i] != input_list[i - 1]:
-            new_list.append(input_list[i])
-    return new_list
+    return [
+        input_list[i]
+        for i in range(len(input_list))
+        if i == 0 or input_list[i] != input_list[i - 1]
+    ]
 
 
 def fix_geminate_or_weak_root(input_list):
-    # for roots which only have 1 letters but then detected repetition of one, assume it's a geminate root
-    if input_list.count("1") == 2 and input_list.count("2") == 1:
-        for i in range(len(input_list)):
-            if input_list[i] == "2":
-                input_list[i] = "1"
-                breakpoint
-    if input_list.count("1") == 2 and input_list.count("4") == 1:
-        for i in range(len(input_list)):
-            if input_list[i] == "4":
-                input_list[i] = "1"
-                breakpoint
+    counts = {item: input_list.count(item) for item in set(input_list)}
+    if counts.get("1") == 2:
+        if counts.get("2") == 1 or counts.get("4") == 1:
+            replace_item = "2" if counts.get("2") == 1 else "4"
+            input_list = ["1" if item == replace_item else item for item in input_list]
     return input_list
 
 
@@ -250,12 +173,11 @@ def root_alignment(input_list, full_root):
         else:
             new_root.append("ᵚ")
 
-    if len(full_root) > 3:
-        if full_root[0] == "t" or full_root[0] == "n" or full_root[0] == "m":
-            for i, item in enumerate(new_root):
-                if item == "t" or item == "n" or item == "m":
-                    new_root[i] = "3"
-                    break
+    if len(full_root) > 3 and full_root[0] in {"t", "n", "m"}:
+        for i, item in enumerate(new_root):
+            if item in {"t", "n", "m"}:
+                new_root[i] = "3"
+                break
 
     output_mapping = {"": "0", "3": "3", "j": "4", "ᵚ": "2"}
     output = [output_mapping.get(item, "1") for item in new_root]
@@ -315,18 +237,14 @@ def arabify(input_list):
     return output_lists
 
 
-def swap_ġħajn(input):
-    output = []
-    for item in input:
-        output.append(item.replace("'", "ġħ"))
-    return output
+def swap_ġħajn(input_list):
+    return [item.replace("'", "ġħ") for item in input_list]
 
 
 def strip_arabic(text):
-    arabic_pattern = re.compile(
-        "[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB00-\uFB4F\uFE70-\uFEFF]"
+    return re.sub(
+        r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB00-\uFB4F\uFE70-\uFEFF]", "", text
     )
-    return arabic_pattern.sub("", text)
 
 
 def clear():
@@ -363,24 +281,18 @@ def isolate(input_lists):
             """
             SELECT `definition` FROM `DICTIONARY` 
             WHERE `word` LIKE ?
-            LIMIT 5
+            LIMIT 15
         """,
             (f"%{result}%",),
         )
 
         rows = cursor.fetchall()
 
-        if len(rows) > 0:
-            print("")
-            print(blue(" ".join(result[::-1]).replace("ك", "ک")))
-            i = 1
-            for row in rows:
-                e = str(i) + " "
-                if i < 10:
-                    e = e + " "
-                print(blue(e) + strip_arabic(row[0][:100]))
-                i += 1
-
+        if rows:
+            print("\n" + blue(" ".join(result[::-1]).replace("ك", "ک")))
+            for i, row in enumerate(rows, start=1):
+                index_str = f"{i:2}"
+                print(blue(index_str) + strip_arabic(row[0][:100]))
 
 if __name__ == "__main__":
     clear()
