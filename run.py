@@ -10,14 +10,12 @@ message = "Type 'help' for additional information. Leave blank for a random exam
 
 # to do:
 # - waħdanija <n> isn't handled
-# - waħħad causes issue, as does <w> in general it seems
-
 
 def main():
     print(message)
     while True:
         user_word = input("> ").lower()
-        user_word = user_word.replace("gh", "għ")
+        user_word = user_word.replace("gh", "ġħ")
         if user_word == "q" or user_word == "quit" or user_word == "exit":
             break
         elif user_word == "clear":
@@ -32,7 +30,7 @@ def main():
             analyse(
                 random.choice(
                     (
-                        "bagħgħad",
+                        "baġħġħad",
                         "beżżieq",
                         "daħħan",
                         "ddammem",
@@ -59,7 +57,7 @@ def analyse(user_word):
     print(message)
     # separate the input based on Maltese orthography
     delimiters = [
-        "għ",
+        "ġħ",
         "ie",
         "a",
         "b",
@@ -152,17 +150,17 @@ def analyse(user_word):
     print(gold("likely Maltese root"))
     if len(radicals) > 3:
         print(
-            "-".join(swap_għajn(radicals)),
+            "-".join(swap_ġħajn(radicals)),
             warn("no prefix detected, assuming longer root"),
         )
-    print("-".join(swap_għajn(radicals)))
+    print("-".join(swap_ġħajn(radicals)))
 
     print("")
     print(gold("alignment"))
     # making the spacing look a little nicer, even though joining with \t would be simpler and easier
     printable_segments = ""
     gap = " "
-    if "ie" in all_segments or "għ" in all_segments:
+    if "ie" in all_segments or "ġħ" in all_segments:
         gap = "  "
     for segment in all_segments:
         printable_segments += segment + (gap if len(segment) > 1 else " " + gap)
@@ -288,45 +286,39 @@ def remove_vowels(letters):
 
 def arabify(input_list):
     mapping = {
-        "ġħ": "ع|غ",
-        "'": "ى|ي|ع",
-        "b": "ب",
-        "d": "ض|د|ذ",
-        "ġ": "ج",
-        "g": "قَ|ك",
-        "ħ": "ح|خ",
-        "h": "ه",
-        "j": "ي",
-        "k": "ك",
-        "l": "ل",
-        "m": "م",
-        "n": "ن",
-        "q": "ق",
-        "r": "ر",
-        "s": "س",
-        "t": "ط|ت|ﺙ",
-        "w": "ﻭ",
-        "x": "ش",
-        "ż": "ز",
+        "ġħ": ["ع", "غ"],
+        "'": ["ى", "ي", "ع"],
+        "b": ["ب"],
+        "d": ["ض", "د", "ذ"],
+        "ġ": ["ج"],
+        "g": ["قَ", "ك"],
+        "ħ": ["ح", "خ"],
+        "h": ["ه"],
+        "j": ["ي"],
+        "k": ["ك"],
+        "l": ["ل"],
+        "m": ["م"],
+        "n": ["ن"],
+        "q": ["ق"],
+        "r": ["ر"],
+        "s": ["س"],
+        "t": ["ط", "ت", "ﺙ"],
+        "w": ["و", "ﻭ"],
+        "x": ["ش"],
+        "ż": ["ز"],
     }
 
-    def replace_match(match):
-        return mapping.get(match.group(0), match.group(0))
+    replacement_options = [mapping.get(char, [char]) for char in input_list]
+    combinations = list(itertools.product(*replacement_options))
+    output_lists = [list(combination) for combination in combinations]
 
-    def replace_in_string(text):
-        for key in mapping:
-            pattern = re.compile(re.escape(key))
-            text = pattern.sub(replace_match, text)
-        return text
-
-    output_list = [replace_in_string(item) for item in input_list]
-    return output_list
+    return output_lists
 
 
-def swap_għajn(input):
+def swap_ġħajn(input):
     output = []
     for item in input:
-        output.append(item.replace("'", "għ"))
+        output.append(item.replace("'", "ġħ"))
     return output
 
 
@@ -344,36 +336,34 @@ def clear():
         os.system("clear")
 
 
-def isolate(input_string):
-    split_data = [item.split("|") for item in input_string]
-    combinations = itertools.product(*split_data)
-    results = ["".join(combination) for combination in combinations]
-    # geminate roots are still done in Maltese as the full three letters,
-    # but not in Arabic, so we create truncated forms for Hans.
-    new_results = []
-    for result in results:
-        new_results.append(result)
-        new = ""
-        new += result[0]
-        for i in range(1, len(result)):
-            if result[i] != result[i - 1]:
-                new += result[i]
-        new_results.append(new)
-    results = list(set(new_results))
+def isolate(input_lists):
+    results = []
+    seen = set()
+
+    for result in input_lists:
+        sublist_tuple = tuple(result)
+        if sublist_tuple not in seen:
+            results.append(result)
+            seen.add(sublist_tuple)
+        # geminate roots in Arabic occur as AB in the Hans Wehr,
+        # not A-B-B as in Maltese, so we need to account for those
+        if len(result) > 2 and result[1] == result[2]:
+            reduced_result = [result[0], result[1]]
+            reduced_tuple = tuple(reduced_result)
+            if reduced_tuple not in seen:
+                results.append(reduced_result)
+                seen.add(reduced_tuple)
 
     conn = sqlite3.connect("hanswehr.sqlite")
     for result in results:
-        if result == "وحد":
-            print("OK!")
+        result = "".join(result)
         cursor = conn.cursor()
-        # query = 'SELECT `definition` FROM `DICTIONARY` WHERE `word` LIKE "%'+result+'%" LIMIT 10;'
-        # print(query)
-        # cursor.execute(query)
+
         cursor.execute(
             """
             SELECT `definition` FROM `DICTIONARY` 
             WHERE `word` LIKE ?
-            LIMIT 10
+            LIMIT 5
         """,
             (f"%{result}%",),
         )
