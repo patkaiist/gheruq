@@ -9,7 +9,7 @@ from gheruq.string_functions import (
     root_alignment,
     get_radicals,
     swap_ġħajn,
-    arabify,
+    get_arabic,
     ask_hans,
 )
 
@@ -73,10 +73,10 @@ def analyse(user_word):
     full_root = get_full_root(user_word)
 
     # generate alignment list
-    aligned_root = root_alignment(all_segments, full_root)
+    alignment = root_alignment(all_segments, full_root)
 
     # work out radicals
-    radicals = get_radicals(aligned_root, all_segments)
+    radicals = get_radicals(alignment, all_segments)
 
     print(gold("\nlikely Maltese root"))
     print("-".join(swap_ġħajn(radicals)))
@@ -92,10 +92,10 @@ def analyse(user_word):
     for segment in all_segments:
         printable_segments += segment + (gap if len(segment) > 1 else " " + gap)
     print(printable_segments)
-    print((" " + gap).join(aligned_root))
+    print((" " + gap).join(alignment))
 
     print(gold("\npossible Arabic roots"))
-    arabic_radicals = arabify(radicals)
+    arabic_radicals = get_arabic(radicals)
 
     hans = ask_hans(arabic_radicals)
 
@@ -105,11 +105,12 @@ def analyse(user_word):
             index_str = f"{i:2}"
             print(blue(index_str) + strip_arabic(row[0][:100]))
 
- 
+
 def strip_arabic(text):
     return re.sub(
         r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB00-\uFB4F\uFE70-\uFEFF]", "", text
-    )   
+    )
+
 
 def warn(text):
     return f"\033[31m{text}\033[0m"
