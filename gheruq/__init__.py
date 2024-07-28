@@ -6,7 +6,8 @@ from .string_functions import (
     root_alignment,
     get_radicals,
     swap_ġħajn,
-    arabify,
+    get_arabic,
     isolate,
     ask_hans,
+    Roots,
 )

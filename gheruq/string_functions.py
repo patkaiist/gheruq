@@ -3,6 +3,14 @@ import itertools
 import sqlite3
 
 
+class Roots:
+    def __init__(self, attribute):
+        self.segments = get_segments(attribute)
+        self.alignment = root_alignment(self.segments, get_full_root(attribute))
+        self.radicals = get_radicals(self.alignment, self.segments)
+        self.root = "-".join(swap_ġħajn(self.radicals))
+
+
 def get_segments(user_word):
     pattern = "|".join(
         map(
@@ -152,7 +160,7 @@ def find_second(input_list):
     return indices[1] if len(indices) > 1 else -1
 
 
-def arabify(maltese_radicals):
+def get_arabic(maltese_radicals):
     mapping = {
         "ġħ": ["ع", "غ"],
         "'": ["ى", "ي", "ع"],
@@ -226,5 +234,5 @@ def ask_hans(arabic_radicals):
 
         rows = cursor.fetchall()
         if rows:
-            output.append([" ".join(result[::-1]).replace("ك", "ک"),rows])
+            output.append([" ".join(result[::-1]).replace("ك", "ک"), rows])
             return output
