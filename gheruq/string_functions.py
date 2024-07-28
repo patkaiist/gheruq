@@ -3,7 +3,7 @@ import itertools
 import sqlite3
 
 
-class Roots:
+class Gheruq:
     def __init__(self, attribute):
         self.segments = get_segments(attribute)
         self.alignment = root_alignment(self.segments, get_full_root(attribute))
