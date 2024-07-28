@@ -8,8 +8,7 @@ import random
 # help message is always shown at the top of the screen
 message = "Type 'help' for additional information. Leave blank for a random example."
 
-# to do:
-# - waħdanija <n> isn't handled
+warning = ""
 
 def main():
     print(message)
@@ -34,23 +33,12 @@ def main():
         else:
             analyse(user_word)
 
+def get_segments(user_word):
+    pattern = "|".join(map(re.escape, ["ġħ", "ie", "a", "b", "ċ", "d", "e", "f", "g", "ġ", "h", "ħ", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "z", "ż",]))
+    return [segment for segment in re.split(f"({pattern})", user_word) if segment]
 
-def analyse(user_word):
-    clear()
-    print(message)
-    # separate the input based on Maltese orthography
-    delimiters = ["ġħ", "ie", "a", "b", "ċ", "d", "e", "f", "g", "ġ", "h", "ħ", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "z", "ż",]
-    pattern = "|".join(map(re.escape, delimiters))
-    all_segments = re.split(f"({pattern})", user_word)
-    all_segments = [item for item in all_segments if item]
-
-    print(gold("\nsegments"))
-    print(" ".join(all_segments))
-
-    # generate most likely root, assuming we're after trilateral roots that may be geminate or weak
-    full_root = remove_vowels(all_segments)
-    full_root = [item for item in full_root if item and item.strip()]
-
+def get_full_root(user_word):
+    full_root = [item for item in remove_vowels(get_segments(user_word)) if item.strip()]
     # we make an aggressively reduced root first, which we then use to work out the more likely form.
     if len(full_root) > 3:
         temp_root = mark_passive_participle(full_root)  # ism mafʿūl
@@ -59,51 +47,61 @@ def analyse(user_word):
             if len(temp_root) > 3:
                 temp_root = remove_weak(temp_root)
             full_root = temp_root
+    return [item for item in full_root if item and item.strip()]
 
-    full_root = [item for item in full_root if item and item.strip()]
+def get_radicals(aligned_root, all_segments):
+    radicals = []
+    for i in range(len(aligned_root)):
+        if aligned_root[i] == "1":
+            radicals.append(all_segments[i])
+    if (aligned_root.count("1") + aligned_root.count("4")) > 3:
+        # check for ism ma
+        if all_segments[0] == "m":
+            warning = "assuming participle"
+        # check for t- or n- prefix
+        elif all_segments[0] == "t" or all_segments[0] == "n":
+            warning = "assuming binyan pattern"
+            aligned_root[0] = "3"
+        # if none of the above, then we may have a plural, so check for that.
+        elif all_segments[len(all_segments) - 1] == "n":
+            warning = "probable plural"
+            aligned_root[len(all_segments) - 1] = "3"
+        # if still none of the above, then assume verb form VIII -t- infix
+        elif all_segments[find_second(aligned_root)] == "t":
+            warning = "probable mediopassive"
+            aligned_root[find_second(aligned_root)] = "3"
+    radicals = []
+    for i in range(len(aligned_root)):
+        if aligned_root[i] == "1":
+            radicals.append(all_segments[i])
+    if len(radicals) > 3:
+        warning = "no prefix detected, assuming longer root"
+    return radicals
+
+def analyse(user_word):
+    clear()
+    print(message)
+
+    # separate the input based on Maltese orthography
+    all_segments = get_segments(user_word)
+
+    print(gold("\nsegments"))
+    print(" ".join(all_segments))
+
+    # generate most likely root, assuming we're after trilateral roots that may be geminate or weak
+    full_root = get_full_root(user_word)
 
     # generate alignment list
     aligned_root = root_alignment(all_segments, full_root)
 
-    radicals = []
-    for i in range(len(aligned_root)):
-        if aligned_root[i] == "1":
-            radicals.append(all_segments[i])
-
-    if (aligned_root.count("1") + aligned_root.count("4")) > 3:
-
-        # check for ism ma
-        if all_segments[0] == "m":
-            print(warn("assuming participle"))
-
-        # check for t- or n- prefix
-        elif all_segments[0] == "t" or all_segments[0] == "n":
-            print(warn("assuming binyan pattern"))
-            aligned_root[0] = "3"
-            type = "b"
-
-        # if none of the above, then we may have a plural, so check for that.
-        elif all_segments[len(all_segments) - 1] == "n":
-            print(warn("probable plural"))
-            aligned_root[len(all_segments) - 1] = "3"
-
-        # if still none of the above, then assume verb form VIII -t- infix
-        elif all_segments[find_second(aligned_root)] == "t":
-            print(warn("probable mediopassive"))
-            aligned_root[find_second(aligned_root)] = "3"
-
-    radicals = []
-    for i in range(len(aligned_root)):
-        if aligned_root[i] == "1":
-            radicals.append(all_segments[i])
+    # work out radicals
+    radicals = get_radicals(aligned_root, all_segments)
 
     print(gold("\nlikely Maltese root"))
-    if len(radicals) > 3:
-        print(
-            "-".join(swap_ġħajn(radicals)),
-            warn("no prefix detected, assuming longer root"),
-        )
     print("-".join(swap_ġħajn(radicals)))
+    if warning:
+        print(warn(warning))
+
 
     print(gold("\nalignment"))
     # making the spacing look a little nicer, even though joining with \t would be simpler and easier
@@ -203,10 +201,10 @@ def remove_vowels(letters):
             out.append(item)
         else:
             out.append("")
-    return out  # [letter for letter in letters if letter.lower() not in vowels]
+    return out
 
 
-def arabify(input_list):
+def arabify(maltese_radicals):
     mapping = {
         "ġħ": ["ع", "غ"],
         "'": ["ى", "ي", "ع"],
@@ -230,10 +228,9 @@ def arabify(input_list):
         "ż": ["ز"],
     }
 
-    replacement_options = [mapping.get(char, [char]) for char in input_list]
+    replacement_options = [mapping.get(char, [char]) for char in maltese_radicals]
     combinations = list(itertools.product(*replacement_options))
     output_lists = [list(combination) for combination in combinations]
-
     return output_lists
 
 
