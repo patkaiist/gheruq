@@ -11,6 +11,7 @@ class Gheruq:
         self.root = "-".join(swap_ghajn(self.radicals))
         self.arabic = confirm_arabic(get_arabic(self.radicals))
 
+
 def get_segments(user_word):
     pattern = "|".join(
         map(
@@ -168,7 +169,7 @@ def get_arabic(maltese_radicals):
         "n": ["ن"],
         "q": ["ق"],
         "r": ["ر"],
-        "s": ["س"],
+        "s": ["س", "ص"],
         "t": ["ط", "ت", "ﺙ"],
         "w": ["و", "ﻭ"],
         "x": ["ش"],
@@ -230,6 +231,7 @@ def ask_hans(arabic_radicals):
             output.append([result, rows])
     return output
 
+
 def confirm_arabic(arabic_radicals):
     separator = "-"
     results = isolate(arabic_radicals)
@@ -251,5 +253,5 @@ def confirm_arabic(arabic_radicals):
         rows = cursor.fetchall()
         if rows:
             output.append(result)
-            
+
     return "\n".join(output)
