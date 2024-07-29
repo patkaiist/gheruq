@@ -18,7 +18,7 @@ Then hit ENTER to use a random pre-coded example word.
 
 ## features
 
-The current version handles most Maltese words of Semitic origin. This includes handling of prefixes (e.g. m-, t-, n-), infixes (-t-) and some cases of -in plurals. Nisba suffixes are not fully handles, especially in cases such as _waħdanija_/_وحدانية_, but are on the to-do list.
+The current version handles most Maltese words of Semitic origin. This includes handling of prefixes (e.g. _m-_, _t-_, _n-_), infixes (_-t-_) and some cases of _-in_ plurals. Nisba suffixes are not fully handled, especially in cases such as _waħdanija_/ وحدانية, but are on the to-do list.
 
 Non-Semitic words will also often work, providing the root as given in Ġabra, were it to occur, but will Obviously not return Arabic results.
 
