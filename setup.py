@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="gheruq",
-    version="0.1.1",
+    version="0.1.0",
     packages=find_packages(),
     description="A package for root detection in Maltese",
     long_description=open("README.md").read(),
