@@ -7,6 +7,8 @@ This repository does not include a copy of the Hans Wehr database file. You will
 
 I put this program together after searching for something which served this purpose without success. There are still some issues to be solved and improvements to be made, but for most cases it is working as expected now.
 
+See the [issues page](https://github.com/patkaiist/gheruq/issues) for a list of known problems.
+
 ## features
 
 The current version handles most Maltese words of Semitic origin. This includes handling of prefixes (e.g. m-, t-, n-), infixes (-t-) and some cases of -in plurals. Nisba suffixes are not fully handles, especially in cases such as _waħdanija_/_وحدانية_, but are on the to-do list.
