@@ -54,13 +54,7 @@ def get_segments(user_word):
 
 def remove_vowels(letters):
     vowels = {"a", "e", "i", "o", "u", "ie"}
-    out = []
-    for item in letters:
-        if item.lower() not in vowels:
-            out.append(item)
-        else:
-            out.append("")
-    return out
+    return ["" if item.lower() in vowels else item for item in letters]
 
 
 def get_full_root(user_word):
@@ -87,28 +81,18 @@ def get_full_root(user_word):
             full_root = temp_root
     return [item for item in full_root if item and item.strip()]
 
-
 def fix_geminate_or_weak_root(input_list):
-    counts = {item: input_list.count(item) for item in set(input_list)}
-    if counts.get("1") == 2:
-        if counts.get("2") == 1 or counts.get("4") == 1:
-            replace_item = "2" if counts.get("2") == 1 else "4"
-            input_list = ["1" if item == replace_item else item for item in input_list]
+    if input_list.count("1") == 2 and (input_list.count("2") == 1 or input_list.count("4") == 1):
+        replace_item = "2" if input_list.count("2") == 1 else "4"
+        input_list = ["1" if item == replace_item else item for item in input_list]
     return input_list
-
 
 def root_alignment(input_list, full_root):
     def remove_internal_vowels(s):
         return "".join(char for char in s if char not in "aeiou")
 
     root = [remove_internal_vowels(item) for item in input_list]
-
-    new_root = [root[0]]
-    for i in range(1, len(root)):
-        if root[i] != root[i - 1]:
-            new_root.append(root[i])
-        else:
-            new_root.append("ᵚ")
+    new_root = [root[i] if i == 0 or root[i] != root[i - 1] else "ᵚ" for i in range(len(root))]
 
     if len(full_root) > 3 and full_root[0] in {"t", "n", "m"}:
         for i, item in enumerate(new_root):
@@ -116,7 +100,7 @@ def root_alignment(input_list, full_root):
                 new_root[i] = "3"
                 break
 
-    output_mapping = {"": "0", "3": "3", "j": "4", "ᵚ": "2"}
+    output_mapping = {"": "0", "j": "4", "ᵚ": "2"}
     output = [output_mapping.get(item, "1") for item in new_root]
     output = fix_geminate_or_weak_root(output)
 
@@ -139,10 +123,10 @@ def get_radicals(aligned_root, all_segments):
         elif all_segments[0] == "t" or all_segments[0] == "n":
             # check for t- or n- prefix
             aligned_root[0] = "3"
-        # if none of the above, then we may have a plural, so check for that.
+            # if none of the above, then we may have a plural, so check for that.
         elif all_segments[len(all_segments) - 1] == "n":
             aligned_root[len(all_segments) - 1] = "3"
-        # if still none of the above, then assume verb form VIII -t- infix
+            # if still none of the above, then assume verb form VIII -t- infix
         elif all_segments[find_second(aligned_root)] == "t":
             aligned_root[find_second(aligned_root)] = "3"
     radicals = []
