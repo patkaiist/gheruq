@@ -10,7 +10,9 @@ from gheruq.string_functions import (
     get_radicals,
     swap_ghajn,
     get_arabic,
+    isolate,
     ask_hans,
+    Gheruq,
 )
 
 # help message is always shown at the top of the screen
@@ -24,7 +26,7 @@ def main():
     while True:
         user_word = input("\n> ").lower()
         user_word = user_word.replace("gh", "ġħ")
-        if user_word == "q" or user_word == "quit" or user_word == "exit":
+        if user_word == "q" or user_word == "quit" or user_word == "exit" or user_word == "quit()":
             break
         elif user_word == "clear":
             clear()
@@ -95,7 +97,7 @@ def analyse(user_word):
     print((" " + gap).join(alignment))
 
     # if the Hans Wehr file is present, also check roots.
-    if os.path.isfile("./hanswehr.dsb"):
+    if os.path.isfile("./hanswehr.db"):
         print(gold("\npossible Arabic roots"))
         arabic_radicals = get_arabic(radicals)
         hans = ask_hans(arabic_radicals)
