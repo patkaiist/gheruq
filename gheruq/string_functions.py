@@ -4,6 +4,8 @@ import sqlite3
 
 
 class Gheruq:
+    """Overall class for root detection and related functionalities."""
+
     def __init__(self, attribute):
         self.segments = get_segments(attribute)
         self.alignment = root_alignment(self.segments, get_full_root(attribute))
@@ -13,6 +15,7 @@ class Gheruq:
 
 
 def get_segments(user_word):
+    """Split the word into segments based on Maltese orthography."""
     pattern = "|".join(
         map(
             re.escape,
@@ -54,11 +57,13 @@ def get_segments(user_word):
 
 
 def remove_vowels(letters):
+    """Remove vowels from a list of letters, but don't change the indices of consonants."""
     vowels = {"a", "e", "i", "o", "u", "ie"}
     return ["" if item.lower() in vowels else item for item in letters]
 
 
 def get_full_root(user_word):
+    """Derive the full root of the word by removing vowels and weak radicals."""
     full_root = [
         item for item in remove_vowels(get_segments(user_word)) if item.strip()
     ]
@@ -84,6 +89,7 @@ def get_full_root(user_word):
 
 
 def fix_geminate_or_weak_root(input_list):
+    """Fix the root if it has geminate or weak radicals."""
     if input_list.count("1") == 2 and (
         input_list.count("2") == 1 or input_list.count("4") == 1
     ):
@@ -93,6 +99,8 @@ def fix_geminate_or_weak_root(input_list):
 
 
 def root_alignment(input_list, full_root):
+    """Align the input based on the derived root."""
+
     def remove_internal_vowels(s):
         return "".join(char for char in s if char not in "aeiou")
 
@@ -119,6 +127,7 @@ def root_alignment(input_list, full_root):
 
 
 def get_radicals(aligned_root, all_segments):
+    """Extract radicals from the aligned root."""
     radicals = []
     for i in range(len(aligned_root)):
         if aligned_root[i] == "1":
@@ -148,11 +157,13 @@ def get_radicals(aligned_root, all_segments):
 
 
 def find_second(input_list):
+    """Find the index of the second occurrence of '1' in the input list."""
     indices = [index for index, value in enumerate(input_list) if value == "1"]
     return indices[1] if len(indices) > 1 else -1
 
 
 def get_arabic(maltese_radicals):
+    """Map Maltese radicals to Arabic equivalents and generate combinations."""
     mapping = {
         "ġħ": ["ع", "غ"],
         "'": ["ى", "ي", "ع"],
@@ -183,11 +194,12 @@ def get_arabic(maltese_radicals):
 
 
 def swap_ghajn(input_list):
-    # apostrophe coda usually corresponds to ġħajn
+    """Replace apostrophe coda with ġħ."""
     return [item.replace("'", "ġħ") for item in input_list]
 
 
 def isolate(input_lists):
+    """Isolate unique combinations of radicals."""
     results = []
     seen = set()
 
@@ -209,30 +221,36 @@ def isolate(input_lists):
 
 
 def ask_hans(arabic_radicals):
-    # prints Arabic results assuming hanswehr.db is present
+    """Returns Arabic results assuming HW is present."""
     results = isolate(arabic_radicals)
     conn = sqlite3.connect("hanswehr.db")
     output = []
-    for result in results:
-        result = "".join(result)
-        cursor = conn.cursor()
+    try:
+        for result in results:
+            result = "".join(result)
+            cursor = conn.cursor()
 
-        cursor.execute(
-            """
-            SELECT `definition` FROM `DICTIONARY` 
-            WHERE `word` LIKE ?
-            LIMIT 15
-        """,
-            (f"%{result}%",),
-        )
+            cursor.execute(
+                """
+                SELECT `definition` FROM `DICTIONARY` 
+                WHERE `word` LIKE ?
+                LIMIT 15
+            """,
+                (f"%{result}%",),
+            )
 
-        rows = cursor.fetchall()
-        if rows:
-            output.append([result, rows])
+            rows = cursor.fetchall()
+            if rows:
+                output.append([result, rows])
+    except sqlite3.Error as e:
+        print(f"SQLite error: {e}")
+    finally:
+        conn.close()
     return output
 
 
 def confirm_arabic(arabic_radicals):
+    """Returns Arabic roots only if found in HW."""
     separator = "-"
     results = isolate(arabic_radicals)
     conn = sqlite3.connect("hanswehr.db")
