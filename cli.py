@@ -8,7 +8,7 @@ from gheruq.string_functions import (
     get_full_root,
     root_alignment,
     get_radicals,
-    swap_ġħajn,
+    swap_ghajn,
     get_arabic,
     ask_hans,
 )
@@ -79,7 +79,7 @@ def analyse(user_word):
     radicals = get_radicals(alignment, all_segments)
 
     print(gold("\nlikely Maltese root"))
-    print("-".join(swap_ġħajn(radicals)))
+    print("-".join(swap_ghajn(radicals)))
     if warning:
         print(warn(warning))
 
@@ -94,16 +94,16 @@ def analyse(user_word):
     print(printable_segments)
     print((" " + gap).join(alignment))
 
-    print(gold("\npossible Arabic roots"))
-    arabic_radicals = get_arabic(radicals)
-
-    hans = ask_hans(arabic_radicals)
-
-    for h in hans:
-        print(blue("\n" + h[0]))
-        for i, row in enumerate(h[1], start=1):
-            index_str = f"{i:2}"
-            print(blue(index_str) + strip_arabic(row[0][:100]))
+    # if the Hans Wehr file is present, also check roots.
+    if os.path.isfile("./hanswehr.dsb"):
+        print(gold("\npossible Arabic roots"))
+        arabic_radicals = get_arabic(radicals)
+        hans = ask_hans(arabic_radicals)
+        for h in hans:
+            print(blue("\n" + h[0]))
+            for i, row in enumerate(h[1], start=1):
+                index_str = f"{i:2}"
+                print(blue(index_str) + strip_arabic(row[0][:100]))
 
 
 def strip_arabic(text):
