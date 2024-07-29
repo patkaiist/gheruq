@@ -8,8 +8,8 @@ class Gheruq:
         self.segments = get_segments(attribute)
         self.alignment = root_alignment(self.segments, get_full_root(attribute))
         self.radicals = get_radicals(self.alignment, self.segments)
-        self.root = "-".join(swap_ġħajn(self.radicals))
-
+        self.root = "-".join(swap_ghajn(self.radicals))
+        self.arabic = confirm_arabic(get_arabic(self.radicals))
 
 def get_segments(user_word):
     pattern = "|".join(
@@ -179,7 +179,8 @@ def get_arabic(maltese_radicals):
     return output_lists
 
 
-def swap_ġħajn(input_list):
+def swap_ghajn(input_list):
+    # apostrophe coda usually corresponds to ġħajn
     return [item.replace("'", "ġħ") for item in input_list]
 
 
@@ -224,5 +225,29 @@ def ask_hans(arabic_radicals):
 
         rows = cursor.fetchall()
         if rows:
-            output.append([" ".join(result[::-1]).replace("ك", "ک"), rows])
-            return output
+            output.append([result, rows])
+    return output
+
+def confirm_arabic(arabic_radicals):
+    separator = "-"
+    results = isolate(arabic_radicals)
+    conn = sqlite3.connect("hanswehr.db")
+    output = []
+    for result in results:
+        result = "".join(result)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT `definition` FROM `DICTIONARY` 
+            WHERE `word` LIKE ?
+            LIMIT 15
+        """,
+            (f"%{result}%",),
+        )
+
+        rows = cursor.fetchall()
+        if rows:
+            output.append(result)
+            
+    return "\n".join(output)
