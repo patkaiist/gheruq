@@ -26,7 +26,12 @@ def main():
     while True:
         user_word = input("\n> ").lower()
         user_word = user_word.replace("gh", "ġħ")
-        if user_word == "q" or user_word == "quit" or user_word == "exit" or user_word == "quit()":
+        if (
+            user_word == "q"
+            or user_word == "quit"
+            or user_word == "exit"
+            or user_word == "quit()"
+        ):
             break
         elif user_word == "clear":
             clear()
@@ -47,18 +52,24 @@ def main():
                         "ħabeż",
                         "ħbejjeb",
                         "ħtalat",
+                        "tiftiq",
                         "ltemaħ",
                         "nissieġ",
                         "qatta",
                         "settieħa",
                         "tibrid",
                         "tibżil",
+                        "nfelaħ",
+                        "fsied",
                         "waħħad",
                     )
                 )
             )
         else:
-            analyse(user_word)
+            try:
+                analyse(user_word)
+            except Exception as e:
+                print(warn(f"Error: {e}"))
 
 
 def analyse(user_word):
