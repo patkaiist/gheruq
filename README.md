@@ -9,6 +9,16 @@ I put this program together after searching for something which served this purp
 
 See the [issues page](https://github.com/patkaiist/gheruq/issues) for a list of known problems.
 
+## quick start
+
+```bash
+git clone https://github.com/patkaiist/gheruq.git
+cd gheruq
+python cli.py
+```
+
+Then hit ENTER to use a random pre-coded example word.
+
 ## features
 
 The current version handles most Maltese words of Semitic origin. This includes handling of prefixes (e.g. m-, t-, n-), infixes (-t-) and some cases of -in plurals. Nisba suffixes are not fully handles, especially in cases such as _waħdanija_/_وحدانية_, but are on the to-do list.
