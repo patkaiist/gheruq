@@ -123,13 +123,14 @@ def get_radicals(aligned_root, all_segments):
         if aligned_root[i] == "1":
             radicals.append(all_segments[i])
     if (aligned_root.count("1") + aligned_root.count("4")) > 3:
-        if all_segments[0] == "m":
-            # check for ism al-mafʿūl, but don't change anything until root_alignment()
-            pass
-        elif all_segments[0] == "t" or all_segments[0] == "n":
+        if all_segments[0] == "t" or all_segments[0] == "n":
             # check for t- or n- prefix
             aligned_root[0] = "3"
             # if none of the above, then we may have a plural, so check for that.
+        elif all_segments[0] == "m":
+            # check for ism al-mafʿūl, but don't change anything until root_alignment()
+            pass
+            # aligned_root[0] = "3"
         elif all_segments[len(all_segments) - 1] == "n":
             aligned_root[len(all_segments) - 1] = "3"
             # if still none of the above, then assume verb form VIII -t- infix
@@ -172,6 +173,7 @@ def get_arabic(maltese_radicals):
         "w": ["و", "ﻭ"],
         "x": ["ش"],
         "ż": ["ز"],
+        "f": ["ف"],
     }
     replacement_options = [mapping.get(char, [char]) for char in maltese_radicals]
     combinations = list(itertools.product(*replacement_options))
