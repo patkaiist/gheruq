@@ -81,18 +81,24 @@ def get_full_root(user_word):
             full_root = temp_root
     return [item for item in full_root if item and item.strip()]
 
+
 def fix_geminate_or_weak_root(input_list):
-    if input_list.count("1") == 2 and (input_list.count("2") == 1 or input_list.count("4") == 1):
+    if input_list.count("1") == 2 and (
+        input_list.count("2") == 1 or input_list.count("4") == 1
+    ):
         replace_item = "2" if input_list.count("2") == 1 else "4"
         input_list = ["1" if item == replace_item else item for item in input_list]
     return input_list
+
 
 def root_alignment(input_list, full_root):
     def remove_internal_vowels(s):
         return "".join(char for char in s if char not in "aeiou")
 
     root = [remove_internal_vowels(item) for item in input_list]
-    new_root = [root[i] if i == 0 or root[i] != root[i - 1] else "ᵚ" for i in range(len(root))]
+    new_root = [
+        root[i] if i == 0 or root[i] != root[i - 1] else "ᵚ" for i in range(len(root))
+    ]
 
     if len(full_root) > 3 and full_root[0] in {"t", "n", "m"}:
         for i, item in enumerate(new_root):
