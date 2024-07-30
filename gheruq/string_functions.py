@@ -2,6 +2,9 @@ import re
 import itertools
 import sqlite3
 
+# dgħajjef < ghajn is misleading
+# darrej < coda j should be radical when shaddah is detected
+
 
 class Gheruq:
     """Overall class for root detection and related functionalities."""
@@ -20,7 +23,7 @@ def get_segments(user_word):
         map(
             re.escape,
             [
-                "ġħ",
+                "għ",
                 "ie",
                 "a",
                 "b",
@@ -85,6 +88,9 @@ def get_full_root(user_word):
                     letter for letter in temp_root if letter.lower() not in {"w", "j"}
                 ]
             full_root = temp_root
+    if len(full_root) == 2:
+        full_root.append("j")
+        # print(full_root)
     return [item for item in full_root if item and item.strip()]
 
 
@@ -165,7 +171,7 @@ def find_second(input_list):
 def get_arabic(maltese_radicals):
     """Map Maltese radicals to Arabic equivalents and generate combinations."""
     mapping = {
-        "ġħ": ["ع", "غ"],
+        "għ": ["ع", "غ"],
         "'": ["ى", "ي", "ع"],
         "b": ["ب"],
         "d": ["ض", "د", "ذ"],
@@ -194,8 +200,8 @@ def get_arabic(maltese_radicals):
 
 
 def swap_ghajn(input_list):
-    """Replace apostrophe coda with ġħ."""
-    return [item.replace("'", "ġħ") for item in input_list]
+    """Replace apostrophe coda with għ."""
+    return [item.replace("'", "għ") for item in input_list]
 
 
 def isolate(input_lists):
