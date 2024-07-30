@@ -1,5 +1,5 @@
-# ġħeruq
-_Ġħeruq_ /ɛːrʊʔ/ is a simple tool for autmated root detection for Maltese, with checks against the Hans Wehr's _A Dictionary of Modern Written Arabic_ for potential cognate root matches if the sqlite3 database file is found locally.
+# għeruq
+_Għeruq_ /ɛːrʊʔ/ is a simple tool for autmated root detection for Maltese, with checks against the Hans Wehr's _A Dictionary of Modern Written Arabic_ for potential cognate root matches if the sqlite3 database file is found locally.
 
 The only intent is to work out roots with some level of reliability. Comparisons to Arabic serve as an additional check of accuracy, as a Maltese root of Semitic origin which does _not_ have a corresponding Arabic root may be either mistakenly identified as semitic, mistakenly parsed for binyan patterns or mimmation, or otherwise erroneous.
 
@@ -28,25 +28,25 @@ For some lexemes, it will not be possible to programmatically identify the stem 
 
 ## examples
 
-To use, import the functions contained in the `gheruq` package and create a new instance of `Gheruq()` with the target word. In this case, _qattieġħ_, "somebody who cuts".
+To use, import the functions contained in the `gheruq` package and create a new instance of `Gheruq()` with the target word. In this case, _qattiegħ_, "somebody who cuts".
 
 ```python
 >>> from gheruq import *
->>> x = Gheruq("qattieġħ")
+>>> x = Gheruq("qattiegħ")
 ```
 
 Using `segments` will return the orthographic form of the word as a list divided by underlying phonemic segments.
 
 ```python
 >>> print(x.segments)
-['q', 'a', 't', 't', 'ie', 'ġħ']
+['q', 'a', 't', 't', 'ie', 'għ']
 ```
 
 The Maltese root according to the conventions of Aquilina/Ġabra can be returned with `root`.
 
 ```python
 >>> print(x.root)
-q-t-ġħ
+q-t-għ
 ```
 
 Cognate Arabic roots which occur in the Hans Wehr dictionary can be returned with `arabic`. Note that additional packages to ensure the correct shape and directionality are not included here, so the order of letters in your output may differ depending on your system.
@@ -57,14 +57,14 @@ Cognate Arabic roots which occur in the Hans Wehr dictionary can be returned wit
 قتع
 ```
 
-As another example, results with _twieġħed_, "to be promised":
+As another example, results with _twiegħed_, "to be promised":
 
 ```python
->>> y = Gheruq("twieġħed")
+>>> y = Gheruq("twiegħed")
 >>> print(y.segments)
-['t', 'w', 'ie', 'ġħ', 'e', 'd']
+['t', 'w', 'ie', 'għ', 'e', 'd']
 >>> print(y.root)
-w-ġħ-d
+w-għ-d
 >>> print(y.arabic)
 وعد
 وغد
