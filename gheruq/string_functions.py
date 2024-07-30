@@ -232,30 +232,33 @@ def isolate(input_lists):
 def ask_hans(arabic_radicals):
     """Returns Arabic results assuming HW is present."""
     results = isolate(arabic_radicals)
-    conn = sqlite3.connect("hanswehr.db")
-    output = []
-    try:
-        for result in results:
-            result = "".join(result)
-            cursor = conn.cursor()
+    if os.path.isfile("./hanswehr.db"):
+        conn = sqlite3.connect("hanswehr.db")
+        output = []
+        try:
+            for result in results:
+                result = "".join(result)
+                cursor = conn.cursor()
 
-            cursor.execute(
-                """
-                SELECT `definition` FROM `DICTIONARY` 
-                WHERE `word` LIKE ?
-                LIMIT 15
-            """,
-                (f"%{result}%",),
-            )
+                cursor.execute(
+                    """
+                    SELECT `definition` FROM `DICTIONARY` 
+                    WHERE `word` LIKE ?
+                    LIMIT 15
+                """,
+                    (f"%{result}%",),
+                )
 
-            rows = cursor.fetchall()
-            if rows:
-                output.append([result, rows])
-    except sqlite3.Error as e:
-        print(f"SQLite error: {e}")
-    finally:
-        conn.close()
-    return output
+                rows = cursor.fetchall()
+                if rows:
+                    output.append([result, rows])
+        except sqlite3.Error as e:
+            print(f"SQLite error: {e}")
+        finally:
+            conn.close()
+        return output
+    else:
+        return None
 
 
 def confirm_arabic(arabic_radicals):
