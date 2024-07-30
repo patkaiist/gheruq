@@ -64,6 +64,7 @@ def remove_vowels(letters):
     vowels = {"a", "e", "i", "o", "u", "ie"}
     return ["" if item.lower() in vowels else item for item in letters]
 
+
 def find_form(input_word):
     segments = get_segments(input_word)
 
@@ -265,23 +266,27 @@ def confirm_arabic(arabic_radicals):
     """Returns Arabic roots only if found in HW."""
     separator = "-"
     results = isolate(arabic_radicals)
-    conn = sqlite3.connect("hanswehr.db")
-    output = []
-    for result in results:
-        result = "".join(result)
-        cursor = conn.cursor()
 
-        cursor.execute(
-            """
-            SELECT `definition` FROM `DICTIONARY` 
-            WHERE `word` LIKE ?
-            LIMIT 15
-        """,
-            (f"%{result}%",),
-        )
+    if os.path.isfile("./hanswehr.db"):
+        conn = sqlite3.connect("hanswehr.db")
+        output = []
+        for result in results:
+            result = "".join(result)
+            cursor = conn.cursor()
 
-        rows = cursor.fetchall()
-        if rows:
-            output.append(result)
+            cursor.execute(
+                """
+                SELECT `definition` FROM `DICTIONARY` 
+                WHERE `word` LIKE ?
+                LIMIT 15
+            """,
+                (f"%{result}%",),
+            )
 
-    return "\n".join(output)
+            rows = cursor.fetchall()
+            if rows:
+                output.append(result)
+
+        return "\n".join(output)
+    else:
+        return None
