@@ -1,4 +1,4 @@
-# għeruq
+# Għeruq
 _Għeruq_ /ɛːrʊʔ/ is a simple tool for autmated root detection for Maltese, with checks against the Hans Wehr's _A Dictionary of Modern Written Arabic_ for potential cognate root matches if the sqlite3 database file is found locally.
 
 The only intent is to work out roots with some level of reliability. Comparisons to Arabic serve as an additional check of accuracy, as a Maltese root of Semitic origin which does _not_ have a corresponding Arabic root may be either mistakenly identified as semitic, mistakenly parsed for binyan patterns or mimmation, or otherwise erroneous.
@@ -7,7 +7,7 @@ This repository does **not** include a copy of the Hans Wehr database file. You 
 
 See the [issues page](https://github.com/patkaiist/gheruq/issues) for a list of known problems.
 
-## quick start
+## Quick start
 
 ```bash
 git clone https://github.com/patkaiist/gheruq.git
@@ -16,17 +16,17 @@ cd gheruq && python cli.py
 
 Then hit ENTER to use a random pre-coded example word.
 
-## features
+## Features
 
 The current version handles most Maltese words of Semitic origin. This includes handling of prefixes (e.g. _m-_, _t-_, _n-_), infixes (_-t-_) and some cases of _-in_ plurals. Nisba suffixes are not fully handled, especially in cases such as _waħdanija_/ وحدانية, but are on the to-do list.
 
 Non-Semitic words will also often work, providing the root as given in Ġabra, were it to occur, but will Obviously not return Arabic results.
 
-## caveat
+## Accuracy
 
-For some lexemes, it will not be possible to programmatically identify the stem with complete accuracy without causing issues for other stems. Currently it fails to correctly identify around 9% of roots in Maltese words. These are nearly allways weak roots, where Maltese has <j> or <i> where the root has -w- (e.g. _żajjar_ < _ż-w-r_), where the root has an assitional weak radical not otherwise represented in the word (_żena_ < _ż-n-j_), or where the form has <j~i> corresponding to a _-w-_ root or vice versa. Some of these can be resolved, but it is unlikely that the app will handle everything correctly.
+For some lexemes, it will not be possible to programmatically identify the stem with complete accuracy without causing issues for other stems. Currently it fails to correctly identify around 9% of roots from the Ġabra `lexemes` bson data dump. These are nearly allways weak roots, where Maltese has <j> or <i> where the root has -w- (e.g. _żajjar_ < _ż-w-r_), where the root has an assitional weak radical not otherwise represented in the word (_żena_ < _ż-n-j_), or where the form has <j~i> corresponding to a _-w-_ root or vice versa. Some of these can be resolved, but it is unlikely that the app will handle everything correctly.
 
-## examples
+## Examples
 
 To use, import the functions contained in the `gheruq` package and create a new instance of `Gheruq()` with the target word. In this case, _qattiegħ_, "somebody who cuts".
 
@@ -80,7 +80,7 @@ k-t-b
 كتب
 ```
 
-## command line app
+## Command line app
 
 If you don't feel like importing into python, you can directly run the `cli.py` app. It takes as an input the Maltese word, and then displays everything else that you might need to know about the root, like so:
 
