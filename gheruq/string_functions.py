@@ -1,6 +1,7 @@
 import re
 import itertools
 import sqlite3
+import os
 
 # dgħajjef < ghajn is misleading
 # darrej < coda j should be radical when shaddah is detected
