@@ -25,7 +25,7 @@ def main():
     print(message)
     while True:
         user_word = input("\n> ").lower()
-        user_word = user_word.replace("gh", "ġħ")
+        user_word = user_word.replace("gh", "għ")
         if (
             user_word == "q"
             or user_word == "quit"
@@ -44,7 +44,7 @@ def main():
             analyse(
                 random.choice(
                     (
-                        "baġħġħad",
+                        "bagħgħad",
                         "beżżieq",
                         "daħħan",
                         "ddammem",
@@ -100,7 +100,7 @@ def analyse(user_word):
     # making the spacing look a little nicer, even though joining with \t would be simpler and easier
     printable_segments = ""
     gap = " "
-    if "ie" in all_segments or "ġħ" in all_segments:
+    if "ie" in all_segments or "għ" in all_segments:
         gap = "  "
     for segment in all_segments:
         printable_segments += segment + (gap if len(segment) > 1 else " " + gap)

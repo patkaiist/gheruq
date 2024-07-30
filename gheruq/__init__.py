@@ -5,9 +5,9 @@ from .string_functions import (
     get_full_root,
     root_alignment,
     get_radicals,
-    swap_ġħajn,
+    swap_ghajn,
     get_arabic,
     isolate,
     ask_hans,
-    Roots,
+    Gheruq,
 )

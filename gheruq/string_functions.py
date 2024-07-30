@@ -64,6 +64,9 @@ def remove_vowels(letters):
     vowels = {"a", "e", "i", "o", "u", "ie"}
     return ["" if item.lower() in vowels else item for item in letters]
 
+def find_form(input_word):
+    segments = get_segments(input_word)
+
 
 def get_full_root(user_word):
     """Derive the full root of the word by removing vowels and weak radicals."""
