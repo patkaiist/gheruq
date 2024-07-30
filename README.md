@@ -22,6 +22,10 @@ The current version handles most Maltese words of Semitic origin. This includes 
 
 Non-Semitic words will also often work, providing the root as given in Ġabra, were it to occur, but will Obviously not return Arabic results.
 
+## caveat
+
+For some lexemes, it will not be possible to programmatically identify the stem with complete accuracy without causing issues for other stems. Currently it fails to correctly identify around 9% of roots in Maltese words. These are nearly allways weak roots, where Maltese has <j> or <i> where the root has -w- (e.g. _żajjar_ < _ż-w-r_), where the root has an assitional weak radical not otherwise represented in the word (_żena_ < _ż-n-j_), or where the form has <j~i> corresponding to a _-w-_ root or vice versa. Some of these can be resolved, but it is unlikely that the app will handle everything correctly.
+
 ## examples
 
 To use, import the functions contained in the `gheruq` package and create a new instance of `Gheruq()` with the target word. In this case, _qattieġħ_, "somebody who cuts".
